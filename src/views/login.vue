@@ -2,7 +2,7 @@
   <div class="login" :style="'background-image:url('+ Background +');'">
     <el-form ref="loginForm" :model="loginForm" :rules="loginRules" label-position="left" label-width="0px" class="login-form">
       <h3 class="title">
-        EL-ADMIN 后台管理系统
+        传感器管理系统
       </h3>
       <el-form-item prop="username">
         <el-input v-model="loginForm.username" type="text" auto-complete="off" placeholder="账号">
@@ -30,6 +30,7 @@
           <span v-if="!loading">登 录</span>
           <span v-else>登 录 中...</span>
         </el-button>
+        <el-link type="primary" @click="jump2register()">还没有账号？点我注册</el-link>
       </el-form-item>
     </el-form>
     <!--  底部  -->
@@ -100,6 +101,9 @@ export default {
         this.codeUrl = res.img
         this.loginForm.uuid = res.uuid
       })
+    },
+    jump2register() {
+      this.$router.push({ name: 'register' })
     },
     getCookie() {
       const username = Cookies.get('username')

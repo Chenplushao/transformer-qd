@@ -5,6 +5,10 @@ import Layout from '../layout/index'
 Vue.use(Router)
 
 export const constantRouterMap = [
+  { name: 'register',
+    path: '/register',
+    component: resolve => require(['@/views/register'], resolve)
+  },
   { path: '/login',
     meta: { title: '登录', noCache: true },
     component: (resolve) => require(['@/views/login'], resolve),
