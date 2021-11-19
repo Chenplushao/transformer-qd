@@ -1,6 +1,7 @@
 <template>
-  <div class="register" :style="'background-image:url('+ Background +');'">
-    <el-form ref="ruleForm" :model="ruleForm" :rules="registerRules" label-width="100px" class="demo-ruleForm">
+  <div class="register">
+    <slot />
+    <el-form v-if="!turnRegister" ref="ruleForm" :model="ruleForm" :rules="registerRules" label-width="100px" class="demo-ruleForm">
       <el-form-item label="账号" prop="username" placeholder="用作登录账号使用">
         <el-input v-model="ruleForm.username" />
       </el-form-item>
@@ -22,20 +23,19 @@
           <el-option label="女性" value="女性" />
         </el-select>
       </el-form-item>
-      <el-button type="primary" @click="submitForm('ruleForm')">立即注册</el-button>
+      <el-button type="primary" size="medium" style="width:100%;" @click="submitForm('ruleForm')">立即注册</el-button>
     </el-form>
   </div>
 </template>
 
 <script>
-import Background from '@/assets/images/background.jpg'
 import { registerNewUser } from '@/api/register'
-
+import { validatePhoneTwo } from '@/utils/validate'
 export default {
   name: 'Register',
+  props: ['turnRegister'],
   data() {
     return {
-      Background: Background,
       ruleForm: {
         email: '',
         gender: '男性',
@@ -55,7 +55,7 @@ export default {
         ],
         phone: [
           { required: true, message: '请输入电话号码', trigger: 'blur' },
-          { min: 11, max: 11, message: '长度在 11 个的字符', trigger: 'blur' }
+          { required: true, trigger: 'blur', validator: validatePhoneTwo }
         ],
         nickname: [
           { required: true, message: '请输入昵称', trigger: 'blur' },
@@ -69,7 +69,7 @@ export default {
       this.$refs[formName].validate((valid) => {
         if (valid) {
           registerNewUser(this.ruleForm.email, this.ruleForm.gender, this.ruleForm.nickname, this.ruleForm.password, this.ruleForm.phone, this.ruleForm.username)
-          this.$router.push({ path: '@/views/login' })
+          this.$emit('fillData', this.ruleForm.username, this.ruleForm.password)
         } else {
           console.log('error submit!!')
           return false

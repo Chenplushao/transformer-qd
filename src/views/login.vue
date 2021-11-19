@@ -4,61 +4,63 @@
       <h3 class="title">
         传感器管理系统
       </h3>
-      <el-form-item prop="username">
+      <el-form-item v-if="turnRegister" prop="username">
         <el-input v-model="loginForm.username" type="text" auto-complete="off" placeholder="账号">
           <svg-icon slot="prefix" icon-class="user" class="el-input__icon input-icon" />
         </el-input>
       </el-form-item>
-      <el-form-item prop="password">
+      <el-form-item v-if="turnRegister" prop="password">
         <el-input v-model="loginForm.password" type="password" auto-complete="off" placeholder="密码" @keyup.enter.native="handleLogin">
           <svg-icon slot="prefix" icon-class="password" class="el-input__icon input-icon" />
         </el-input>
       </el-form-item>
-      <el-form-item prop="code">
+      <Register :turn-register="turnRegister" @fillData="fillData" />
+      <el-form-item v-if="turnRegister" prop="code">
         <el-input v-model="loginForm.code" auto-complete="off" placeholder="验证码" style="width: 63%" @keyup.enter.native="handleLogin">
           <svg-icon slot="prefix" icon-class="validCode" class="el-input__icon input-icon" />
         </el-input>
-        <div class="login-code">
+        <div v-if="turnRegister" class="login-code">
           <img :src="codeUrl" @click="getCode">
         </div>
       </el-form-item>
-      <el-checkbox v-model="loginForm.rememberMe" style="margin:0 0 25px 0;">
+      <el-checkbox v-if="turnRegister" v-model="loginForm.rememberMe" style="margin:0 0 25px 0;">
         记住我
       </el-checkbox>
       <el-form-item style="width:100%;">
-        <el-button :loading="loading" size="medium" type="primary" style="width:100%;" @click.native.prevent="handleLogin">
+        <el-button v-if="turnRegister" :loading="loading" size="medium" type="primary" style="width:100%;" @click.native.prevent="handleLogin">
           <span v-if="!loading">登 录</span>
           <span v-else>登 录 中...</span>
         </el-button>
-        <el-link type="primary" @click="jump2register()">还没有账号？点我注册</el-link>
+        <el-link type="primary" style="left: 28%" @click="goRegister()">{{ tip }}</el-link>
       </el-form-item>
     </el-form>
     <!--  底部  -->
-    <div v-if="$store.state.settings.showFooter" id="el-login-footer">
-      <span v-html="$store.state.settings.footerTxt" />
-      <span> ⋅ </span>
-      <a href="https://beian.miit.gov.cn/#/Integrated/index" target="_blank">{{ $store.state.settings.caseNumber }}</a>
-    </div>
+
   </div>
 </template>
 
 <script>
+
 import { encrypt } from '@/utils/rsaEncrypt'
 import Config from '@/settings'
 import { getCodeImg } from '@/api/login'
 import Cookies from 'js-cookie'
 import qs from 'qs'
 import Background from '@/assets/images/background.jpg'
+import Register from '@/views/register'
 export default {
   name: 'Login',
+  components: { Register },
   data() {
     return {
+      tip: '还没账号？点我注册',
+      turnRegister: true,
       Background: Background,
       codeUrl: '',
       cookiePass: '',
       loginForm: {
-        username: 'admin',
-        password: '123456',
+        username: '',
+        password: '',
         rememberMe: false,
         code: '',
         uuid: ''
@@ -96,14 +98,25 @@ export default {
     this.point()
   },
   methods: {
+    fillData(un, pw) {
+      this.loginForm.username = un
+      this.loginForm.password = pw
+      this.turnRegister = !this.turnRegister
+      this.tip = '已有账号?点我登录'
+    },
+    goRegister() {
+      this.turnRegister = !this.turnRegister
+      if (this.turnRegister === true) {
+        this.tip = '没有账号？点我注册'
+      } else {
+        this.tip = '已有账号？点我登录'
+      }
+    },
     getCode() {
       getCodeImg().then(res => {
         this.codeUrl = res.img
         this.loginForm.uuid = res.uuid
       })
-    },
-    jump2register() {
-      this.$router.push({ name: 'register' })
     },
     getCookie() {
       const username = Cookies.get('username')
